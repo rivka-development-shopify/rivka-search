@@ -1,0 +1,27 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+name = "Rivka Template App"
+client_id = "7ab60da68715cfe1ada32e8ccdf37ccc"
+application_url = "https://dt-mid-href-shakira.trycloudflare.com"
+embedded = true
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+scopes = "write_products"
+
+[auth]
+redirect_urls = [
+  "https://dt-mid-href-shakira.trycloudflare.com/auth/callback",
+  "https://dt-mid-href-shakira.trycloudflare.com/auth/shopify/callback",
+  "https://dt-mid-href-shakira.trycloudflare.com/api/auth/callback"
+]
+
+[webhooks]
+api_version = "2023-07"
+
+[pos]
+embedded = false
+
+[build]
+automatically_update_urls_on_dev = true
+dev_store_url = "newbie-dkcx.myshopify.com"
