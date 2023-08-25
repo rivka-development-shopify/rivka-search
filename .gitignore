@@ -28,3 +28,6 @@ extensions/*/build
 web/database.sqlite
 
 shopify.app.rivka-template-app.toml
+
+yarn.lock
+package-lock.json
