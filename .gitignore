@@ -29,7 +29,6 @@ web/database.sqlite
 
 shopify.app.rivka-template-app.toml
 shopify.app.toml
-shopify.web.toml
 
 yarn.lock
 package-lock.json
