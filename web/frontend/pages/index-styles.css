@@ -1,0 +1,15 @@
+.rules-list {
+    margin-bottom: 52px;
+}
+
+.delete-button {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.button-text-wrapper {
+    max-width: 300px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
