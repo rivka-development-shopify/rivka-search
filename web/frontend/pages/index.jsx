@@ -1,22 +1,27 @@
 import {
   Page,
   LegacyCard,
-  ResourceList,
-  Button,
   Icon,
+  Button,
+  Tag,
   Text,
-  IndexTable
+  IndexTable,
+  TextField
 } from "@shopify/polaris";
 
 import {
-  DeleteMinor
+  DeleteMinor,
+  CancelSmallMinor,
+  PlusMinor,
+  EditMinor
 } from '@shopify/polaris-icons';
 
 import { ResourcePicker } from '@shopify/app-bridge-react'
 import './index-styles.css';
 import { useEffect, useState } from "react";
 
-
+import Switch from "../components/Switch";
+import objectDeepCompare from "../utils/objectDeepCompare";
 
 
 const StaticRules = [
@@ -24,8 +29,8 @@ const StaticRules = [
       id: 1,
       name: "My Custom Rule 1",
       keyWords: [
-          "word1",
-          "word2"
+        {id: 1, key: "word1" },
+        {id: 2, key: "word2" }
       ],
       productList: [
       ],
@@ -36,8 +41,8 @@ const StaticRules = [
       id: 2,
       name: "My Custom Rule 2",
       keyWords: [
-          "word1",
-          "word2"
+          {id: 3, key: "word3" },
+          {id: 4, key: "word4" }
       ],
       productList: [
         
@@ -71,6 +76,8 @@ const StaticRules = [
   }
 ];
 
+let whatchRulesChange = false;
+
 export default function HomePage() {
   const [showPicker, setPickerVisibility] = useState(false);
   const [pickerInitialSelectionIds, setPickerInitialSelectionIds] = useState([]);
@@ -91,6 +98,16 @@ export default function HomePage() {
     console.log(pickerType)
   };
 
+  const askSave = () => {
+    const answer = confirm('save?')
+    console.log(answer)
+    if(answer) {
+      setOriginalRules(rules)
+    } else {
+      setRules(originalRules)
+    }
+  }
+  
   const handleOpenPicker = (rule, newPickerType) => {
     if(newPickerType === "Product") {
       setPickerInitialSelectionIds(rule.productList.map(product => ({id: product.id})));
@@ -117,6 +134,7 @@ export default function HomePage() {
       return updatedRules;
     })
     clearPickerState();
+    
   }
   
   const clearPickerState = () => {
@@ -134,10 +152,50 @@ export default function HomePage() {
     })
   };
 
+  const handleSwitchClick = (switchRuleId) => {
+    setRules(rules => {
+      const updatedRules = [ ...rules ];
+      updatedRules.find(rule => rule.id === switchRuleId).enabled = !updatedRules.find(rule => rule.id === switchRuleId).enabled
+      return updatedRules;
+    })
+  }
+  const handleTagRemove = (tagRuleId, keyId) => {
+    console.log(`removing key ${keyId} from rule ${tagRuleId}`)
+    setRules(rules => {
+      const updatedRules = [ ...rules ];
+      const newKeys = updatedRules.find(rule => rule.id === tagRuleId).keyWords.filter(({id }) => id !== keyId)
+      console.log(newKeys)
+      updatedRules.find(rule => rule.id === tagRuleId).keyWords = newKeys
+      console.log(updatedRules)
+      return updatedRules;
+    })
+  }
+
+  const handleTagAdd = (tagRuleId) => {};
+
+  const handleNameEdit = (nameRuleId) => {
+    document.getElementById(`rule-${nameRuleId}-name`).style.display = 'none';
+    document.getElementById(`rule-${nameRuleId}-name-edit`).style.display = 'block';
+  };
+
+  const handleRuleNameChange = (e) => {};
+  /*
+  TODO: track rules changes and save bar...
+  useEffect(() => {
+    console.log('rules changed')
+    console.log(whatchRulesChange)
+    if(whatchRulesChange === false) {
+      whatchRulesChange = true;
+    } else {
+      alert('true')
+    }
+  }, [rules]);
+  */
   useEffect(() => {
     setOriginalRules(StaticRules);
     setRules(StaticRules);
-  }, [])
+    console.log('rules and original rules loaded from server')
+  }, []);
   
 
   return (
@@ -149,7 +207,7 @@ export default function HomePage() {
       fullWidth={true}
     >
 
-      //ADD A SHOPIFY POLARIS SAVE BAR EVERYTIME RULES STATE IS DIFFERENT FROM ORIGINAL RULES
+      {/* //ADD A SHOPIFY POLARIS SAVE BAR EVERYTIME RULES STATE IS DIFFERENT FROM ORIGINAL RULES */}
       <div className="rules-list">
         <LegacyCard title="Your Search Rules" sectioned >
           <IndexTable 
@@ -159,7 +217,8 @@ export default function HomePage() {
               {title: 'Key Word'},
               {title: 'Product List'},
               {title: 'Collection List'},
-              {title: 'Status'}
+              {title: 'Status'},
+              {title: 'Delete', hidden: true}
             ]}
             itemCount={rules.length}
             selectable={false}
@@ -170,9 +229,37 @@ export default function HomePage() {
                 key={index}
                 position={index}
               >
-                <IndexTable.Cell><Text>{rule.name}</Text></IndexTable.Cell>
-                <IndexTable.Cell><Text>{rule.keyWords.slice(0,3).join(', ')}</Text></IndexTable.Cell>
-                <IndexTable.Cell>
+                <IndexTable.Cell className="name-cell">
+                  <button className="name-edit-button" onClick={(e) => {e.preventDefault(); handleNameEdit(rule.id)}} id={`rule-${rule.id}-name`}>
+                    <Text>
+                      {rule.name}
+                    </Text>
+                  </button>
+                  <div id={`rule-${rule.id}-name-edit`} style={{display: 'none'}}>
+                    <TextField
+                      labelHidden={true}
+                      value={rule.name}
+                      onChange={() => {handleRuleNameChange(e, rule.id)}}
+                      autoComplete="off"
+                    />
+                  </div>
+                </IndexTable.Cell>
+                <IndexTable.Cell className="tag-cell">
+                  {rule.keyWords.map(({id: keyId, key}, index) => (
+                    <div className="tag-wrapper" key={`tag-wrapper-${rule.id}-${index}`}>
+                      <Tag key={`tag-${rule.id}-${index}`} >
+                        <div className="tag-text-wrapper">
+                          {key}
+                          <button className="tag-remove-button" onClick={(e) => {e.preventDefault(); handleTagRemove(rule.id, keyId)}}><Icon source={CancelSmallMinor} color="base" /></button>
+                        </div>
+                      </Tag>
+                    </div>
+                  ))}
+                  <button className="tag-add-button" onClick={(e) => {e.preventDefault(); handleTagAdd(rule.id)}}><Icon source={PlusMinor} color="base" /></button>
+                </IndexTable.Cell>
+                <IndexTable.Cell
+                  className={rule.productList.length == 0 ? "add-to-list" : "list"}
+                >
                   <Button
                     fullWidth={false}
                     plain={rule.productList.length > 0}
@@ -182,7 +269,9 @@ export default function HomePage() {
                     <div className="button-text-wrapper">{rule.productList.length > 0 ? rule.productList.map(product => product.title).slice(0,3).join(' , ') : "Add products to this rule."}</div>
                   </Button>
                 </IndexTable.Cell>
-                <IndexTable.Cell>
+                <IndexTable.Cell
+                  className={rule.collectionList.length == 0 ? "add-to-list" : "list"}
+                >
                   <div className="button-text-wrapper">
                   <Button
                     fullWidth={false}
@@ -196,7 +285,15 @@ export default function HomePage() {
                 </IndexTable.Cell>
                 
                 <IndexTable.Cell>
-                  <Text>Switch</Text>
+                  <Switch
+                    name="enabled"
+                    id="enbled"
+                    labelStyle={{
+                      display: "none"
+                    }}
+                    checked={rule.enabled}
+                    onChange={(e) => handleSwitchClick(rule.id)}
+                  />
                 </IndexTable.Cell>
                 
                 <IndexTable.Cell>

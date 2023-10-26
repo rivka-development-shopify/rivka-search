@@ -13,3 +13,53 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+.tag-wrapper {
+    margin-right: 4px;
+    margin-top: 4px;
+}
+
+.tag-cell {
+    min-width: 300px;
+    display: flex;
+    align-items: center;
+}
+.name-cell {
+    min-width: 300px;
+}
+
+.add-to-list {
+    padding-left: 40px!important;
+}
+
+.tag-text-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.tag-add-button,
+.tag-remove-button {
+    margin: 0px;
+    padding: 0px;
+    border: 0px;
+    background: rgba(255, 255, 255, 0);
+    height: 0.9rem;
+    width: 0.8rem;
+    margin-left: 2px;
+    margin-top: 2px;
+
+}
+
+.name-edit-button {
+    border: 0px;
+    padding: 0px;
+    margin: 0px;
+    background: rgba(255, 255, 255, 0);
+    cursor: text;
+}
+
+.tag-add-button {
+    margin-right: 4px;
+    margin-top: 4px;
+}
